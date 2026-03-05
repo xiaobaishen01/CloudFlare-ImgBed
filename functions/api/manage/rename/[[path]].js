@@ -2,6 +2,7 @@ import { S3Client, CopyObjectCommand, DeleteObjectCommand } from "@aws-sdk/clien
 import { purgeCFCache, purgeRandomFileListCache, purgePublicFileListCache } from "../../../utils/purgeCache";
 import { moveFileInIndex } from "../../../utils/indexManager.js";
 import { getDatabase } from '../../../utils/databaseAdapter.js';
+import { sanitizeUploadFolder } from "../../../upload/uploadTools.js";
 
 // CORS 跨域响应头
 const corsHeaders = {
@@ -72,7 +73,9 @@ export async function onRequest(context) {
             });
         }
 
-        const newFileId = body.newFileId;
+        // 路径安全处理
+        const newFileId = sanitizeUploadFolder(body.newFileId.trim());
+
         const url = new URL(request.url);
         const db = getDatabase(env);
 
